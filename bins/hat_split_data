@@ -1,0 +1,80 @@
+# -*- coding: utf-8 -*-
+"""
+# @file name  : hat_split_data.py
+# @author     :
+# @date       : 2022-3-30
+# @brief      : 划分安全帽数据集
+"""
+
+import os
+import random
+import shutil  # 文件的剪切复制粘贴
+
+# 创建划分数据对应的文件夹
+def my_mkdir(my_dir):
+    if not os.path.exists(my_dir):
+        os.mkdir(my_dir)
+# 函数里面放入的是形参的名字，在调用的时候才穿入的是实参
+def move_img(imgs_labels, root_dir, setname):
+    image_data_dir = os.path.join(root_dir, setname)+ "\\images"
+    label_data_dir = os.path.join(root_dir, setname) + "\\annotations"
+    my_mkdir(image_data_dir)
+    my_mkdir(label_data_dir)
+    # 目录创建完成以后，该放图片了
+    # 列表的迭代
+    for idx, path in enumerate(imgs_labels):
+        # print("path_img",path_img)
+        # print("path_label",path_label)
+        shutil.copy(path[0], image_data_dir)
+        shutil.copy(path[1], label_data_dir)
+
+
+
+if __name__ == "__main__":
+    # 0 .config:写入一些你所需要的参数
+    random_seed = 20220210  # 随机种子，生成真正的随机数
+    # 训练集，验证集，测试集的划分比例
+    train_ratio = 0.8
+    valid_ratio = 0.1
+    test_ratio = 0.1
+    # 数据目录
+    root_dir = r'D:\jinhua\shenduzhiyan\image_object_detection\FCOS\data\HardHatWorkers'
+    images_dir = os.path.join(root_dir, "images")
+    label_dir = os.path.join(root_dir, "annotations")
+    # print(images_dir)
+    # print(label_dir)
+
+    # 数据加入列表
+    name_imgs = [p for p in os.listdir(images_dir) if p.endswith(".png")]
+    # print(name_imgs)
+    path_imgs = [os.path.join(images_dir, name) for name in name_imgs]
+    # print(path_imgs)
+
+    name_labels = [p for p in os.listdir(label_dir) if p.endswith(".xml")]
+    # print(name_labels)
+    path_labels = [os.path.join(label_dir, label) for label in name_labels]
+    # print(path_labels)
+
+    # 打包
+    total_data = []
+    for i in range(len(path_imgs)):
+        dan_data = (path_imgs[i], path_labels[i])
+        total_data.append(dan_data)
+    # print(total_data)
+    # print(len(total_data))
+
+    # 随机打乱
+    random.seed(random_seed)  # 这里将种子固定以后，后面每次打乱以后的数据都是一样的
+    random.shuffle(total_data)
+
+    train_breakpoints = int(len(total_data) * train_ratio)
+    valid_breakpoints = int(len(total_data) * (train_ratio + valid_ratio))
+
+    train = total_data[:train_breakpoints]
+    valid = total_data[train_breakpoints:valid_breakpoints]
+    test = total_data[valid_breakpoints:]
+
+    # 移动数据
+    move_img(train, root_dir, "train")
+    move_img(valid, root_dir, "valid")
+    move_img(test, root_dir, "test")
