@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+"""
+# @file name  : hat_split_data.py
+# @author     :
+# @date       : 2022-3-30
+# @brief      : 按照划分好的数据集将其写入对应的txt文档
+"""
+import os
+def my_mkdir(my_dir):
+    if not os.path.isdir(my_dir):
+        file = open(my_dir, 'w')
+        file.close()
+
+def xierutxt(root_dir, setname):
+    path_txt = os.path.join(root_dir, setname)
+    if not os.path.exists(path_txt):
+        my_mkdir(path_txt)
+
+    # 添加所有文件
+    imgs_data_dir = os.path.join(root_dir,setname[:-4],"annotations")
+    name_imgs = [p for p in os.listdir(imgs_data_dir) if p.endswith(".xml")]
+
+    # 写入txt
+    for i in range(len(name_imgs)):
+        with open(path_txt, "a") as f:
+            f.write(name_imgs[i][:-4])
+            f.write("\n")
+
+
+if __name__ == "__main__":
+    # 数据目录
+    root_dir = r'D:\jinhua\shenduzhiyan\image_object_detection\FCOS\data\HardHatWorkers'
+
+    xierutxt(root_dir, "valid.txt")
